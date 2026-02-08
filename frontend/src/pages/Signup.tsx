@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 import './Login.css';
 
 const Signup: React.FC = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { signup } = useAuth();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Demo signup - just redirect to login
-        navigate('/login');
+        setError('');
+        const success = await signup(username, password);
+        if (success) {
+            // Redirect to login successful or direct to login page
+            navigate('/login');
+        } else {
+            setError('Signup failed. Username may already exist.');
+        }
     };
 
     return (
@@ -61,6 +70,7 @@ const Signup: React.FC = () => {
                             required
                         />
                     </div>
+                    {error && <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
 
                     <button type="submit" className="btn btn-primary full-width">
                         Sign Up

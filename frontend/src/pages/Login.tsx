@@ -16,7 +16,7 @@ const Login: React.FC = () => {
         setError('');
         const success = await login(username, password);
         if (success) {
-            navigate('/dashboard');
+            navigate('/login-successful');
         } else {
             setError('Invalid credentials');
         }
@@ -26,7 +26,7 @@ const Login: React.FC = () => {
         try {
             await demoLogin();
             // Force navigation to dashboard after successful login
-            navigate('/dashboard', { replace: true });
+            navigate('/login-successful', { replace: true });
         } catch (err) {
             setError('Demo login failed. Please try again.');
             console.error(err);

@@ -4,6 +4,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   username: string | null;
   login: (username: string, password: string) => Promise<boolean>;
+  signup: (username: string, password: string) => Promise<boolean>;
   demoLogin: () => Promise<boolean>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -55,6 +56,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signup = async (username: string, password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('http://localhost:5051/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Signup failed:', error);
+      return false;
+    }
+  };
+
   const demoLogin = async (): Promise<boolean> => {
     try {
       const response = await fetch('http://localhost:5051/api/auth/login', {
@@ -91,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, username, login, demoLogin, logout, checkAuth }}>
+    <AuthContext.Provider value={{ isAuthenticated, username, login, signup, demoLogin, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

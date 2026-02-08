@@ -43,6 +43,46 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+import json
+
+USERS_FILE = 'users.json'
+
+def load_users():
+    if not os.path.exists(USERS_FILE):
+        return {'admin': 'admin'}
+    try:
+        with open(USERS_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return {'admin': 'admin'}
+
+def save_users(users):
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f)
+
+@app.route('/api/auth/signup', methods=['POST'])
+def signup():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Username and password required'}), 400
+            
+        users = load_users()
+        
+        if username in users:
+            return jsonify({'success': False, 'message': 'Username already exists'}), 400
+            
+        users[username] = password
+        save_users(users)
+        
+        return jsonify({'success': True, 'message': 'User created successfully'})
+    except Exception as e:
+        print(f"Signup error: {str(e)}")
+        return jsonify({'success': False, 'message': 'Server error'}), 500
+
 @app.route('/api/auth/login', methods=['POST'])
 def login():
     try:
@@ -60,8 +100,10 @@ def login():
         username = data.get('username')
         password = data.get('password')
         
-        # Simple hardcoded check
-        if username == 'admin' and password == 'admin':
+        users = load_users()
+        stored_password = users.get(username)
+        
+        if stored_password and stored_password == password:
             session.permanent = True
             session['logged_in'] = True
             session['username'] = username
